@@ -2,8 +2,8 @@ using System;
 
 namespace SICXEAssembler{
   public class Program{
-    public Program(){
-
+    public static void Main(string[] args){
+    
     }
   }
 }

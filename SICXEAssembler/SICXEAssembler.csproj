@@ -33,6 +33,7 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="Assembler\Instruction.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -45,4 +46,7 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <Folder Include="Assembler\" />
+  </ItemGroup>
 </Project>
