@@ -34,6 +34,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Assembler\Instruction.cs" />
+    <Compile Include="Assembler\Assembler.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
