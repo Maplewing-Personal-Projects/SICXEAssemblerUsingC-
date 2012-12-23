@@ -4,8 +4,14 @@ using System.Collections.Generic;
 namespace SICXEAssembler{
   public class Assembler{
     static Dictionary<string, Instruction> _instructionTable = new Dictionary<string, Instruction>();
+    static Dictionary<string, int> _registerTable = new Dictionary<string, int>();
 
     static Assembler(){
+      CreateInstructionTable();
+      CreateRegisterTable();
+    }
+
+    static void CreateInstructionTable(){
       _instructionTable.Add("ADD", new Instruction("ADD", Instruction.Format.LONG, 0x18, 1));
       _instructionTable.Add("ADDF", new Instruction("ADDF", Instruction.Format.LONG, 0x58, 1));
       _instructionTable.Add("ADDR", new Instruction("ADDR", Instruction.Format.MIDDLE, 0x90, 2));
@@ -65,6 +71,18 @@ namespace SICXEAssembler{
       _instructionTable.Add("TIX", new Instruction("TIX", Instruction.Format.LONG, 0x2C, 1));
       _instructionTable.Add("TIXR", new Instruction("TIXR", Instruction.Format.MIDDLE, 0xB8, 1));
       _instructionTable.Add("WD", new Instruction("WD", Instruction.Format.LONG, 0xDC, 1));
+    }
+
+    static void CreateRegisterTable(){
+      _registerTable.Add("A", 0);
+      _registerTable.Add("X", 1);
+      _registerTable.Add("L", 2);
+      _registerTable.Add("PC", 8);
+      _registerTable.Add("SW", 9);
+      _registerTable.Add("B", 3);
+      _registerTable.Add("S", 4);
+      _registerTable.Add("T", 5);
+      _registerTable.Add("F", 6);
     }
 
     public Assembler(){
