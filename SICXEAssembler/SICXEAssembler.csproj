@@ -33,8 +33,14 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="Assembler\Instruction.cs" />
     <Compile Include="Assembler\Assembler.cs" />
+    <Compile Include="Assembler\InstructionType.cs" />
+    <Compile Include="Assembler\StatementType.cs" />
+    <Compile Include="Assembler\DirectiveType.cs" />
+    <Compile Include="Assembler\TwoPassAssembler.cs" />
+    <Compile Include="Assembler\Statement.cs" />
+    <Compile Include="Assembler\Directive.cs" />
+    <Compile Include="Assembler\Instruction.cs" />
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -49,5 +55,14 @@
   </ProjectExtensions>
   <ItemGroup>
     <Folder Include="Assembler\" />
+    <Folder Include="SampleSICXECode\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="SampleSICXECode\normalsicxe.asm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
   </ItemGroup>
 </Project>
