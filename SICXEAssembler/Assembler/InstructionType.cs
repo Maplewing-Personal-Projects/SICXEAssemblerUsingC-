@@ -20,9 +20,19 @@ namespace SICXEAssembler
             _argumentNum = argumentNum;
         }
 
-        public override Statement Create(string label, List<string> arguments)
+        public override Statement Create(string label, string mnemonic, List<string> arguments)
         {
-            return new Instruction(this, label, arguments);
+            switch (_format)
+            {
+                case Format.SMALL:
+                    return new Instruction(this, label, arguments, 1);
+                case Format.MIDDLE:
+                    return new Instruction(this, label, arguments, 2);
+                case Format.LONG:
+                    if (mnemonic[0] == '+') return new Instruction(this, label, arguments, 4);
+                    else return new Instruction(this, label, arguments, 3);
+            }
+            throw new Exception();
         }
     }
 }

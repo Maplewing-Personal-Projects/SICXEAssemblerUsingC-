@@ -9,8 +9,15 @@ namespace SICXEAssembler
         {
             using (StreamReader code = new StreamReader("SampleSICXECode/normalsicxe.asm"))
             {
-                TwoPassAssembler assembler = new TwoPassAssembler(code);
-                assembler.Assemble();
+                try
+                {
+                    TwoPassAssembler assembler = new TwoPassAssembler(code);
+                    assembler.Assemble();
+                }
+                catch (Error e)
+                {
+                    Console.WriteLine(e.ErrorMessage);
+                }
             }
         }
     }

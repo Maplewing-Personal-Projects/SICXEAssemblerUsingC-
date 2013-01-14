@@ -16,7 +16,7 @@ namespace SICXEAssembler
             _mnemonic = mnemonic;
         }
 
-        public abstract Statement Create(string label, List<string> arguments);
+        public abstract Statement Create(string label, string mnemonic, List<string> arguments);
     }
 }
 

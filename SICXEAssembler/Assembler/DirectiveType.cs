@@ -10,9 +10,9 @@ namespace SICXEAssembler
         {
         }
 
-        public override Statement Create(string label, List<string> arguments)
+        public override Statement Create(string label, string mnemonic, List<string> arguments)
         {
-            return new Directive(this, label, arguments);
+            return new Directive(this, label, arguments, 0);
         }
     }
 }

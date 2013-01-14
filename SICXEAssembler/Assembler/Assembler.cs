@@ -17,7 +17,7 @@ namespace SICXEAssembler
             CreateRegisterTable();
 
             string labelPartRegExp = @"\w+";
-            string argumentPartRegExp = @"[\w\#\@']+";
+            string argumentPartRegExp = @"(?:[\w\#\@]+|(?i:C'.*')|(?i:X'.*'))";
             string statementPartRegExp = "";
             foreach (KeyValuePair<string, StatementType> s in _statementTypeTable)
             {

@@ -48,14 +48,13 @@ namespace SICXEAssembler
                     _code.Add(
                       _statementTypeTable[
                         ((m.Groups[2].Value[0] == '+') ? m.Groups[2].Value.Substring(1) : m.Groups[2].Value)
-                      ].Create(m.Groups[1].Value, arguments));
+                      ].Create(m.Groups[1].Value, m.Groups[2].Value, arguments));
 
                     Console.WriteLine(_code[_code.Count - 1].ToString());
                 }
                 else
                 {
-                    Console.WriteLine(line + "is WRONG!");
-                    throw new Exception();
+                    throw new Error("The line:" + line + " is wrong. Please check it.");
                 }
             }
         }

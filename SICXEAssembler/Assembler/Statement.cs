@@ -8,12 +8,14 @@ namespace SICXEAssembler
         string _label;
         StatementType _type;
         List<string> _arguments;
+        int _length;
 
-        public Statement(StatementType type, string label, List<string> arguments)
+        public Statement(StatementType type, string label, List<string> arguments, int length)
         {
             _type = type;
             _label = label;
             _arguments = arguments;
+            _length = length;
         }
 
         public override string ToString()

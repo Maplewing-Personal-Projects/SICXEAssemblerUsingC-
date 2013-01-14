@@ -5,8 +5,8 @@ namespace SICXEAssembler
 {
     public class Directive : Statement
     {
-        public Directive(StatementType type, string label, List<string> arguments)
-            : base(type, label, arguments)
+        public Directive(StatementType type, string label, List<string> arguments, int length)
+            : base(type, label, arguments, length)
         {
         }
     }
