@@ -7,7 +7,17 @@ namespace SICXEAssembler
     {
         public static void Main(string[] args)
         {
-            using (StreamReader code = new StreamReader("SampleSICXECode/normalsicxe.asm"))
+            string filename = "";
+            if (args.Length < 1)
+            {
+                Console.Write("FileName: ");
+                filename = Console.ReadLine();
+            }
+            else
+            {
+                filename = args[0];
+            }
+            using (StreamReader code = new StreamReader(filename))
             {
                 try
                 {
