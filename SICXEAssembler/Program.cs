@@ -23,6 +23,7 @@ namespace SICXEAssembler
                 {
                     TwoPassAssembler assembler = new TwoPassAssembler(code);
                     assembler.Assemble();
+                    
                 }
                 catch (Error e)
                 {

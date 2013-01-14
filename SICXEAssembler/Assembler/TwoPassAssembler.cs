@@ -8,6 +8,7 @@ namespace SICXEAssembler
     public class TwoPassAssembler : Assembler
     {
         TextReader _codeReader;
+        TextWriter _codeWriter;
         List<Statement> _code = new List<Statement>();
         public Dictionary<string, int> SymbolTable { get; set; }
 
@@ -19,10 +20,17 @@ namespace SICXEAssembler
 
         public override void Assemble()
         {
-            OnePass();
+            FirstPass();
+            foreach (KeyValuePair<string, int> symbol in SymbolTable)
+            {
+                Console.WriteLine("SYMBOL: {0}, Location: {1}", symbol.Key, string.Format("{0:X}", symbol.Value).PadLeft(6, '0'));
+            }
+            _codeWriter = new StreamWriter(CodeName+".o");
+            SecondPass();
+            _codeWriter.Close();
         }
 
-        private void OnePass()
+        private void FirstPass()
         {
             string line;
             while ((line = _codeReader.ReadLine()) != null)
@@ -43,7 +51,7 @@ namespace SICXEAssembler
                     }
 
                     _code.Add(
-                      _statementTypeTable[
+                      StatementTypeTable[
                         ((m.Groups[2].Value[0] == '+') ? m.Groups[2].Value.Substring(1) : m.Groups[2].Value)
                       ].Create(m.Groups[1].Value, m.Groups[2].Value, arguments));
                     _code[_code.Count - 1].FirstPass(this);
@@ -52,6 +60,71 @@ namespace SICXEAssembler
                 else
                 {
                     throw new Error("The line:" + line + " is wrong. Please check it.");
+                }
+            }
+        }
+
+        private void SecondPass()
+        {
+            int previousIndex = 0;
+            for(int i = 0 ; i < _code.Count ; i++)
+            {
+                _code[i].SecondPass(this);
+                Console.WriteLine(i.ToString() + ":" + _code[i].Code);
+                if (_code[i].Code != null && _code[i].Code != "")
+                {
+                    if (_code[i].Code[0] == 'H' || _code[i].Code[0] == 'E')
+                    {
+                        if (_previousOutputAddress != NoAddress)
+                        {
+                            _codeWriter.Write("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            for (int j = previousIndex; j < i; j++)
+                            {
+                                _codeWriter.Write("{0}", _code[j].Code);
+                            }
+                            _previousOutputAddress = NoAddress;
+                            _codeWriter.WriteLine();
+                        }
+                        _codeWriter.WriteLine(_code[i].Code);
+                    }
+                    else
+                    {
+                        _code[i].Code = _code[i].Code.Substring(1);
+                        if (_previousOutputAddress == NoAddress)
+                        {
+                            _previousOutputAddress = _code[i].Location;
+                            _codeWriter.Write("T{0}", string.Format("{0:X}", _previousOutputAddress).PadLeft(6, '0'));
+                            previousIndex = i;
+                        }
+                        else if (_code[i].Location - _previousOutputAddress + _code[i].Length >= 0x20)
+                        {
+                            _codeWriter.Write("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            for (int j = previousIndex; j < i; j++)
+                            {
+                                _codeWriter.Write("{0}", _code[j].Code);
+                            }
+                            _codeWriter.WriteLine();
+                            _previousOutputAddress = _code[i].Location;
+                            _codeWriter.Write("T{0}", string.Format("{0:X}", _previousOutputAddress).PadLeft(6, '0'));
+                            previousIndex = i;
+                        }
+                    }
+                }
+                else
+                {
+                    if (_code[i+1].Location - _code[i].Location > 0)
+                    {
+                        if (_previousOutputAddress != NoAddress)
+                        {
+                            _codeWriter.Write("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            for (int j = previousIndex; j < i; j++)
+                            {
+                                _codeWriter.Write("{0}", _code[j].Code);
+                            }
+                            _previousOutputAddress = NoAddress;
+                            _codeWriter.WriteLine();
+                        }
+                    }
                 }
             }
         }

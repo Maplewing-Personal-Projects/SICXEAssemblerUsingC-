@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SICXEAssembler
 {
@@ -9,7 +10,15 @@ namespace SICXEAssembler
         protected StatementType _type;
         protected List<string> _arguments;
         protected int _length;
+        protected string _code;
         public int Location { get; set; }
+        public int Length { get { return _length; } }
+
+        public string Code
+        {
+            get { return _code; }
+            set { _code = value; }
+        }
 
         public Statement(StatementType type, string label, List<string> arguments, int length)
         {
@@ -32,6 +41,7 @@ namespace SICXEAssembler
         }
 
         public abstract void FirstPass(TwoPassAssembler tpa);
+        public abstract void SecondPass(TwoPassAssembler tpa);
     }
 }
 

@@ -5,8 +5,8 @@ namespace SICXEAssembler
 {
     public class DirectiveType : StatementType
     {
-        public DirectiveType(string mnemonic)
-            : base(mnemonic)
+        public DirectiveType(string mnemonic, int argumentNum = 0)
+            : base(mnemonic, argumentNum)
         {
         }
 

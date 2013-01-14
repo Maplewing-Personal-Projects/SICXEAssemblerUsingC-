@@ -9,11 +9,18 @@ namespace SICXEAssembler
 
         Format _format;
         int _opcode;
-        int _argumentNum;
+        public int Opcode
+        {
+            get { return _opcode; }
+        }
+        public Format Size
+        {
+            get { return _format; }
+        }
 
         public InstructionType(string mnemonic, Format format,
                            int opcode, int argumentNum)
-            : base(mnemonic)
+            : base(mnemonic, argumentNum)
         {
             _format = format;
             _opcode = opcode;
