@@ -9,10 +9,12 @@ namespace SICXEAssembler
     {
         TextReader _codeReader;
         List<Statement> _code = new List<Statement>();
+        public Dictionary<string, int> SymbolTable { get; set; }
 
         public TwoPassAssembler(TextReader tr)
         {
             _codeReader = tr;
+            SymbolTable = new Dictionary<string, int>();
         }
 
         public override void Assemble()
@@ -21,11 +23,6 @@ namespace SICXEAssembler
         }
 
         private void OnePass()
-        {
-            Parse();
-        }
-
-        private void Parse()
         {
             string line;
             while ((line = _codeReader.ReadLine()) != null)
@@ -49,7 +46,7 @@ namespace SICXEAssembler
                       _statementTypeTable[
                         ((m.Groups[2].Value[0] == '+') ? m.Groups[2].Value.Substring(1) : m.Groups[2].Value)
                       ].Create(m.Groups[1].Value, m.Groups[2].Value, arguments));
-
+                    _code[_code.Count - 1].FirstPass(this);
                     Console.WriteLine(_code[_code.Count - 1].ToString());
                 }
                 else

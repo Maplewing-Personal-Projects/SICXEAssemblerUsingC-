@@ -5,10 +5,11 @@ namespace SICXEAssembler
 {
     public abstract class Statement
     {
-        string _label;
-        StatementType _type;
-        List<string> _arguments;
-        int _length;
+        protected string _label;
+        protected StatementType _type;
+        protected List<string> _arguments;
+        protected int _length;
+        public int Location { get; set; }
 
         public Statement(StatementType type, string label, List<string> arguments, int length)
         {
@@ -16,6 +17,7 @@ namespace SICXEAssembler
             _label = label;
             _arguments = arguments;
             _length = length;
+            Location = 0;
         }
 
         public override string ToString()
@@ -25,8 +27,11 @@ namespace SICXEAssembler
             {
                 temp += string.Format("{0};", arg);
             }
+            temp += string.Format("\nLength:{0}, Location:{1}", _length, string.Format("{0:X}",Location).PadLeft(4,'0'));
             return temp;
         }
+
+        public abstract void FirstPass(TwoPassAssembler tpa);
     }
 }
 

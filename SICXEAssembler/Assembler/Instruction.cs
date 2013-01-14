@@ -9,6 +9,16 @@ namespace SICXEAssembler
             : base(type, label, arguments,length)
         {
         }
+
+        public override void FirstPass(TwoPassAssembler tpa)
+        {
+            Location = tpa.CurrentAddress;
+            if (_label != null && _label != "")
+            {
+                tpa.SymbolTable[_label] = Location;
+            }
+            tpa.CurrentAddress += _length;
+        }
     }
 }
 

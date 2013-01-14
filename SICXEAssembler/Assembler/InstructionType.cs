@@ -22,6 +22,12 @@ namespace SICXEAssembler
 
         public override Statement Create(string label, string mnemonic, List<string> arguments)
         {
+            label = label.ToUpper();
+            for (int i = 0; i < arguments.Count; i++)
+            {
+                arguments[i] = arguments[i].ToUpper();
+            }
+
             switch (_format)
             {
                 case Format.SMALL:

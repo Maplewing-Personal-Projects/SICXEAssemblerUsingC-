@@ -6,10 +6,46 @@ namespace SICXEAssembler
 {
     public abstract class Assembler
     {
-        protected static readonly Dictionary<string, StatementType> _statementTypeTable = new Dictionary<string, StatementType>();
-        protected static readonly Dictionary<string, int> _registerTable = new Dictionary<string, int>();
+        public static readonly Dictionary<string, StatementType> _statementTypeTable = new Dictionary<string, StatementType>();
+        public static readonly Dictionary<string, int> _registerTable = new Dictionary<string, int>();
         protected static readonly Regex _sicxeStatementRegExp;
         protected static readonly Regex _sicxeCommentRegExp;
+        public const int InitAddress = 0;
+
+        protected int _length = 0;
+        public int Length
+        {
+            get { return _length; }
+            set { _length = value; }
+        }
+
+        protected int _startAddress = InitAddress;
+        public int StartAddress
+        {
+            get { return _startAddress; }
+            set { _startAddress = value; }
+        }
+
+        protected int _currentAddress = InitAddress;
+        public int CurrentAddress
+        {
+            get { return _currentAddress; }
+            set { _currentAddress = value; }
+        }
+
+        protected int _endAddress = InitAddress;
+        public int EndAddress
+        {
+            get { return _endAddress; }
+            set { _endAddress = value; }
+        }
+
+        protected int _baseAddress = InitAddress;
+        public int BaseAddress
+        {
+            get { return _baseAddress; }
+            set { _baseAddress = value; }
+        }
 
         static Assembler()
         {
@@ -17,7 +53,7 @@ namespace SICXEAssembler
             CreateRegisterTable();
 
             string labelPartRegExp = @"\w+";
-            string argumentPartRegExp = @"(?:[\w\#\@]+|(?i:C'.*')|(?i:X'.*'))";
+            string argumentPartRegExp = @"(?:(?:(?:\#|\@)?\w+)|(?i:C'.*')|(?i:X'.*'))";
             string statementPartRegExp = "";
             foreach (KeyValuePair<string, StatementType> s in _statementTypeTable)
             {
