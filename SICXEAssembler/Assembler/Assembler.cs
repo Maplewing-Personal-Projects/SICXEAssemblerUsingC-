@@ -159,6 +159,8 @@ namespace SICXEAssembler
             StatementTypeTable.Add("CSECT", new DirectiveType("CSECT"));
             StatementTypeTable.Add("EQU", new DirectiveType("EQU", 1));
             StatementTypeTable.Add("LTORG", new DirectiveType("LTORG"));
+            StatementTypeTable.Add("EXTDEF", new DirectiveType("EXTDEF"));
+            StatementTypeTable.Add("EXTREF", new DirectiveType("EXTREF"));
         }
 
         static void CreateRegisterTable()

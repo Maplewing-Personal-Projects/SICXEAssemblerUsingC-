@@ -14,6 +14,7 @@ namespace SICXEAssembler
         public List<string> EquTable { get; set; }
         public Dictionary<string, Tuple<int,int>> BlockTable { get; set; }
         public string CurrentBlockName = "(default)";
+        public List<string> RefTable { get; set; }
 
         public TwoPassAssembler(TextReader tr) : base(tr)
         {
@@ -23,6 +24,7 @@ namespace SICXEAssembler
             BlockTable = new Dictionary<string, Tuple<int,int>>();
             BlockTable[CurrentBlockName] = new Tuple<int,int>(0,0);
             BlockSymbolTable = new Dictionary<string, Tuple<string, int>>();
+            RefTable = new List<string>();
         }
 
         public override void Assemble()
@@ -112,13 +114,14 @@ namespace SICXEAssembler
             {
                 _code[i].SecondPass(this);
 
-                if (_code[i].Relocation != null && _code[i].Relocation != "")
+                if (_code[i].Relocation != null && _code[i].Relocation.Count >= 1 )
                 {
-                    mc.MRecord.Add(_code[i].Relocation);
+                    mc.MRecord.AddRange(_code[i].Relocation);
                 }
                 if (_code[i].Code != null && _code[i].Code[0] != "")
                 {
-                    if (_code[i].Code[0][0] == 'H' || _code[i].Code[0][0] == 'E')
+                    if (_code[i].Code[0][0] == 'H' || _code[i].Code[0][0] == 'E' ||
+                        _code[i].Code[0][0] == 'D' || _code[i].Code[0][0] == 'R' )
                     {
                         if (_previousOutputAddress != NoAddress)
                         {
@@ -133,9 +136,17 @@ namespace SICXEAssembler
                         {
                             mc.HRecord = _code[i].Code[0];
                         }
-                        else
+                        else if (_code[i].Code[0][0] == 'E')
                         {
                             mc.ERecord = _code[i].Code[0];
+                        }
+                        else if (_code[i].Code[0][0] == 'D')
+                        {
+                            mc.DRecord = _code[i].Code[0];
+                        }
+                        else if (_code[i].Code[0][0] == 'R')
+                        {
+                            mc.RRecord = _code[i].Code[0];
                         }
                     }
                     else

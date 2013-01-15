@@ -9,13 +9,17 @@ namespace SICXEAssembler
     class MachineCode
     {
         public string HRecord = "";
+        public string DRecord = "";
+        public string RRecord = "";
         public List<string> TRecord = new List<string>();
         public List<string> MRecord = new List<string>();
         public string ERecord = "";
 
         public void Write(TextWriter tw)
         {
-            tw.WriteLine(HRecord);
+            if (HRecord != "") tw.WriteLine(HRecord);
+            if (DRecord != "") tw.WriteLine(DRecord);
+            if (RRecord != "") tw.WriteLine(RRecord);
             foreach (string s in TRecord)
             {
                 tw.WriteLine(s);
@@ -24,7 +28,7 @@ namespace SICXEAssembler
             {
                 tw.WriteLine(s);
             }
-            tw.WriteLine(ERecord);
+            if (ERecord != "") tw.WriteLine(ERecord);
         }
 
     }

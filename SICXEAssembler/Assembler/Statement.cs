@@ -11,7 +11,7 @@ namespace SICXEAssembler
         protected List<string> _arguments;
         protected int _length;
         protected List<string> _code = new List<string>();
-        protected string _relocation;
+        protected List<string> _relocation = new List<string>();
         public int Location { get; set; }
         public string BlockLocation { get; set; }
         public int Length { get { return _length; } }
@@ -22,7 +22,7 @@ namespace SICXEAssembler
             set { _code = value; }
         }
 
-        public string Relocation
+        public List<string> Relocation
         {
             get { return _relocation; }
             set { _relocation = value; }

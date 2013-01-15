@@ -17,8 +17,12 @@ namespace SICXEAssembler
             Location = tpa.CurrentAddress;
             switch (_type.Mnemonic)
             {
-                case "START":
-                    tpa.StartAddress = Convert.ToInt32(_arguments[0], 16);
+                case "START": case "CSECT":
+                    if (_arguments.Count >= 1)
+                    {
+                        tpa.StartAddress = Convert.ToInt32(_arguments[0], 16);
+                    }
+                    else tpa.StartAddress = 0;
                     tpa.CurrentAddress = tpa.StartAddress;
                     Location = tpa.CurrentAddress;
                     if (_label != null && _label != "")
@@ -106,6 +110,13 @@ namespace SICXEAssembler
                     BlockLocation = tpa.CurrentBlockName;
                     Location = tpa.CurrentAddress;
                     break;
+                case "EXTREF":
+                    tpa.RefTable.AddRange(_arguments);
+                    foreach (string s in _arguments)
+                    {
+                        tpa.SymbolTable[s] = 0;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -122,13 +133,20 @@ namespace SICXEAssembler
             _code.Add("");
             switch (_type.Mnemonic)
             {
-                case "START":
+                case "START": case "CSECT":
                     _code[_code.Count - 1] += ("H" + tpa.CodeName.PadRight(6) + 
                         string.Format("{0:X}",tpa.StartAddress).PadLeft(6,'0') +
                         string.Format("{0:X}", tpa.Length).PadLeft(6, '0'));
                     break;
                 case "END":
-                    _code[_code.Count - 1] += ("E" + string.Format("{0:X}", tpa.SymbolTable[_arguments[0]]).PadLeft(6, '0'));
+                    if (_arguments.Count >= 1)
+                    {
+                        _code[_code.Count - 1] += ("E" + string.Format("{0:X}", tpa.SymbolTable[_arguments[0]]).PadLeft(6, '0'));
+                    }
+                    else
+                    {
+                        _code[_code.Count - 1] += "E";
+                    }
                     break;
                 case "BASE":
                     tpa.BaseAddress = tpa.SymbolTable[_arguments[0]];
@@ -152,7 +170,38 @@ namespace SICXEAssembler
                     }
                     break;
                 case "WORD":
-                    _code[_code.Count - 1] += string.Format("{0:X}", Convert.ToInt32(_arguments[0])).PadLeft(6, '0');
+                    if (_arguments[0].Contains("-"))
+                    {
+                        string arg1 = _arguments[0].Split('-')[0], arg2 = _arguments[0].Split('-')[1];
+                        if (tpa.RefTable.Contains(arg1) || tpa.RefTable.Contains(arg2))
+                        {
+                            _code[_code.Count - 1] += "000000";
+                            _relocation.Add("M" + string.Format("{0:X}", Location).PadLeft(6, '0') + "06+" + arg1);
+                            _relocation.Add("M" + string.Format("{0:X}", Location).PadLeft(6, '0') + "06-" + arg2);
+                        }
+                        else
+                        {
+                            _code[_code.Count - 1] += string.Format("{0:X}",tpa.SymbolTable[arg1]-tpa.SymbolTable[arg2]).PadLeft(6, '0');
+                        }
+                    }
+                    else
+                    {
+                        _code[_code.Count - 1] += string.Format("{0:X}", Convert.ToInt32(_arguments[0])).PadLeft(6, '0');
+                    }
+                    break;
+                case "EXTDEF":
+                    _code[0] += "D";
+                    foreach (string s in _arguments)
+                    {
+                        _code[0] += s + string.Format("{0:X}", tpa.SymbolTable[s]).PadLeft(6, '0');
+                    }
+                    break;
+                case "EXTREF":
+                    _code[0] += "R";
+                    foreach (string s in tpa.RefTable)
+                    {
+                        _code[0] += s.PadRight(6, ' ');
+                    }
                     break;
             }
         }

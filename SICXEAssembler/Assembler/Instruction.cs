@@ -77,9 +77,9 @@ namespace SICXEAssembler
 
                     if (_length == 4)
                     {
-                        _relocation = string.Format("M{0}05+{1}",
+                        _relocation.Add(string.Format("M{0}05+{1}",
                                         string.Format("{0:X}", Location + 1).PadLeft(6, '0'),
-                                        tpa.CodeName);
+                                        tpa.CodeName));
                     }
                     if (_type.ArgumentNum >= 1)
                     {
@@ -98,7 +98,7 @@ namespace SICXEAssembler
                                     opcode = (opcode << 1) + 1;
                                     opcode = (opcode << 20) + result;
                                     _code[_code.Count - 1] += string.Format("{0:X}", opcode).PadLeft(8, '0');
-                                    _relocation = null;
+                                    _relocation.RemoveAt(0);
                                 }
                                 else
                                 {
@@ -125,12 +125,23 @@ namespace SICXEAssembler
                         opcode = (opcode << 1) + x;
                         if (_length == 4)
                         {
-                            opcode = (opcode << 3) + 1;
-                            opcode = (opcode << 20) + tpa.SymbolTable[_arguments[0]];
+                            if (tpa.RefTable.Contains(_arguments[0]))
+                            {
+                                opcode = (opcode << 3) + 1;
+                                opcode <<= 20;
+                                _relocation.RemoveAt(0);
+                                _relocation.Add("M" + string.Format("{0:X}", Location + 1).PadLeft(6, '0') + "05+" + _arguments[0]);
+                            }
+                            else
+                            {
+                                opcode = (opcode << 3) + 1;
+                                opcode = (opcode << 20) + tpa.SymbolTable[_arguments[0]];
+                            }
                             _code[_code.Count - 1] += string.Format("{0:X}", opcode).PadLeft(8, '0');
                         }
                         else
                         {
+                            if (tpa.RefTable.Contains(_arguments[0])) throw new Error("Can't use extref with format 3.");
                             if (tpa.SymbolTable[_arguments[0]] - (Location + Length) <= 2047 &&
                                 tpa.SymbolTable[_arguments[0]] - (Location + Length) >= -2048)
                             {
@@ -260,9 +271,9 @@ namespace SICXEAssembler
 
                     if (_length == 4)
                     {
-                        _relocation = string.Format("M{0}05+{1}",
+                        _relocation.Add(string.Format("M{0}05+{1}",
                                         string.Format("{0:X}", Location + 1).PadLeft(6, '0'),
-                                        opa.CodeName);
+                                        opa.CodeName));
                     }
                     if (_type.ArgumentNum >= 1)
                     {
