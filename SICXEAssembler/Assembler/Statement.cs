@@ -11,6 +11,7 @@ namespace SICXEAssembler
         protected List<string> _arguments;
         protected int _length;
         protected string _code;
+        protected string _relocation;
         public int Location { get; set; }
         public int Length { get { return _length; } }
 
@@ -18,6 +19,12 @@ namespace SICXEAssembler
         {
             get { return _code; }
             set { _code = value; }
+        }
+
+        public string Relocation
+        {
+            get { return _relocation; }
+            set { _relocation = value; }
         }
 
         public Statement(StatementType type, string label, List<string> arguments, int length)

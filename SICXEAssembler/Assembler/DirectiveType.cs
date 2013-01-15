@@ -19,7 +19,7 @@ namespace SICXEAssembler
                         return new Directive(this, label, arguments, arguments[0].Substring(1).Length - 2);
                     else if (arguments[0][0] == 'X' && arguments[0][1] == '\'')
                         return new Directive(this, label, arguments, arguments[0].Substring(1).Length / 2 - 1);
-                    else throw new Error("Argument Fault: ");
+                    else throw new Error("Argument Fault!");
                 case "WORD":
                     return new Directive(this, label, arguments, 3);
                 case "RESB":

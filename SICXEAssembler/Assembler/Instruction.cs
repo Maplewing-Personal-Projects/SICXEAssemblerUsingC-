@@ -7,7 +7,7 @@ namespace SICXEAssembler
     public class Instruction : Statement
     {
         public Instruction(StatementType type, string label, List<string> arguments, int length)
-            : base(type, label, arguments,length)
+            : base(type, label, arguments, length)
         {
         }
 
@@ -42,7 +42,7 @@ namespace SICXEAssembler
             switch (((InstructionType)_type).Size)
             {
                 case InstructionType.Format.SMALL:
-                   _code += string.Format("{0:X}",((InstructionType)_type).Opcode).PadLeft(2,'0');
+                    _code += string.Format("{0:X}", ((InstructionType)_type).Opcode).PadLeft(2, '0');
                     break;
                 case InstructionType.Format.MIDDLE:
                     _code += string.Format("{0:X}", ((InstructionType)_type).Opcode).PadLeft(2, '0');
@@ -58,6 +58,13 @@ namespace SICXEAssembler
                     break;
                 case InstructionType.Format.LONG:
                     long opcode = ((InstructionType)_type).Opcode;
+
+                    if (_length == 4)
+                    {
+                        _relocation = string.Format("M{0}05+{1}",
+                                        string.Format("{0:X}", Location+1).PadLeft(6, '0'),
+                                        tpa.CodeName);
+                    }
                     if (_type.ArgumentNum >= 1)
                     {
                         if (_arguments[0][0] == '#')
@@ -75,6 +82,7 @@ namespace SICXEAssembler
                                     opcode = (opcode << 1) + 1;
                                     opcode = (opcode << 20) + result;
                                     _code += string.Format("{0:X}", opcode).PadLeft(8, '0');
+                                    _relocation = null;
                                 }
                                 else
                                 {

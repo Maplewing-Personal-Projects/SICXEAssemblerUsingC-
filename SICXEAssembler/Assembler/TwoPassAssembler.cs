@@ -66,46 +66,59 @@ namespace SICXEAssembler
 
         private void SecondPass()
         {
+            MachineCode mc = new MachineCode();
             int previousIndex = 0;
             for(int i = 0 ; i < _code.Count ; i++)
             {
                 _code[i].SecondPass(this);
                 Console.WriteLine(i.ToString() + ":" + _code[i].Code);
+
+                if (_code[i].Relocation != null && _code[i].Relocation != "")
+                {
+                    mc.MRecord.Add(_code[i].Relocation);
+                }
                 if (_code[i].Code != null && _code[i].Code != "")
                 {
                     if (_code[i].Code[0] == 'H' || _code[i].Code[0] == 'E')
                     {
                         if (_previousOutputAddress != NoAddress)
                         {
-                            _codeWriter.Write("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            mc.TRecord[mc.TRecord.Count-1] += string.Format("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
                             for (int j = previousIndex; j < i; j++)
                             {
-                                _codeWriter.Write("{0}", _code[j].Code);
+                                mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", _code[j].Code);
                             }
                             _previousOutputAddress = NoAddress;
-                            _codeWriter.WriteLine();
                         }
-                        _codeWriter.WriteLine(_code[i].Code);
+                        if (_code[i].Code[0] == 'H')
+                        {
+                            mc.HRecord = _code[i].Code;
+                        }
+                        else
+                        {
+                            mc.ERecord = _code[i].Code;
+                        }
                     }
                     else
                     {
                         _code[i].Code = _code[i].Code.Substring(1);
                         if (_previousOutputAddress == NoAddress)
                         {
+                            mc.TRecord.Add("");
                             _previousOutputAddress = _code[i].Location;
-                            _codeWriter.Write("T{0}", string.Format("{0:X}", _previousOutputAddress).PadLeft(6, '0'));
+                            mc.TRecord[mc.TRecord.Count-1] += string.Format("T{0}", string.Format("{0:X}", _previousOutputAddress).PadLeft(6, '0'));
                             previousIndex = i;
                         }
                         else if (_code[i].Location - _previousOutputAddress + _code[i].Length >= 0x20)
                         {
-                            _codeWriter.Write("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            mc.TRecord[mc.TRecord.Count-1] += string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0');
                             for (int j = previousIndex; j < i; j++)
                             {
-                                _codeWriter.Write("{0}", _code[j].Code);
+                                mc.TRecord[mc.TRecord.Count-1] += _code[j].Code;
                             }
-                            _codeWriter.WriteLine();
+                            mc.TRecord.Add("");
                             _previousOutputAddress = _code[i].Location;
-                            _codeWriter.Write("T{0}", string.Format("{0:X}", _previousOutputAddress).PadLeft(6, '0'));
+                             mc.TRecord[mc.TRecord.Count-1] += string.Format("T{0}", string.Format("{0:X}", _previousOutputAddress).PadLeft(6, '0'));
                             previousIndex = i;
                         }
                     }
@@ -116,17 +129,17 @@ namespace SICXEAssembler
                     {
                         if (_previousOutputAddress != NoAddress)
                         {
-                            _codeWriter.Write("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
                             for (int j = previousIndex; j < i; j++)
                             {
-                                _codeWriter.Write("{0}", _code[j].Code);
+                                mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", _code[j].Code);
                             }
                             _previousOutputAddress = NoAddress;
-                            _codeWriter.WriteLine();
                         }
                     }
                 }
             }
+            mc.Write(_codeWriter);
         }
     }
 }
