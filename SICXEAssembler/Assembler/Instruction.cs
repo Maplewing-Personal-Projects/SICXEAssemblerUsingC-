@@ -13,16 +13,32 @@ namespace SICXEAssembler
 
         public override void FirstPass(TwoPassAssembler tpa)
         {
+            BlockLocation = tpa.CurrentBlockName;
             Location = tpa.CurrentAddress;
             if (_label != null && _label != "")
             {
-                tpa.SymbolTable[_label] = Location;
+                tpa.BlockSymbolTable[_label] = new Tuple<string, int>(BlockLocation, Location);
             }
             tpa.CurrentAddress += _length;
+
+            if (_arguments.Count > 0)
+            {
+                foreach (string s in _arguments)
+                {
+                    if (s[0] == '=')
+                    {
+                        if (!tpa.LiteralTable.Contains(s))
+                        {
+                            tpa.LiteralTable.Add(s);
+                        }
+                    }
+                }
+            }
         }
 
         public override void SecondPass(TwoPassAssembler tpa)
         {
+            base.SecondPass(tpa);
             int x = 0;
             if (_arguments.Count != _type.ArgumentNum)
             {
@@ -92,6 +108,13 @@ namespace SICXEAssembler
                                 }
                                 break;
                             }
+                            else
+                            {
+                                if (_length == 4 && tpa.EquTable.Contains(_arguments[0]))
+                                {
+                                    _relocation = null;
+                                }
+                            }
                         }
                         else if (_arguments[0][0] == '@')
                         {
@@ -113,6 +136,8 @@ namespace SICXEAssembler
                             {
                                 opcode = (opcode << 3) + 2;
                                 opcode = (opcode << 12) + tpa.SymbolTable[_arguments[0]] - (Location + Length);
+                                if (tpa.SymbolTable[_arguments[0]] - (Location + Length) < 0)
+                                    opcode += (1 << 12);
                             }
                             else if (tpa.BaseAddress != Assembler.NoAddress)
                             {
@@ -130,14 +155,15 @@ namespace SICXEAssembler
                     }
                     else
                     {
+                        opcode += 3;
                         if (_length == 4)
                         {
-                            opcode <<= 25;
+                            opcode <<= 24;
                             _code[_code.Count - 1] += string.Format("{0:X}", opcode).PadLeft(8, '0');
                         }
                         else
                         {
-                            opcode <<= 17;
+                            opcode <<= 16;
                             _code[_code.Count - 1] += string.Format("{0:X}", opcode).PadLeft(6, '0');
                         }
                     }

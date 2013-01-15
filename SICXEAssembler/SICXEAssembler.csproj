@@ -59,10 +59,19 @@
   </ProjectExtensions>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="SampleSICXECode\literalsicxe.asm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SampleSICXECode\normalsicxe.asm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleSICXECode\onepasssicxe.asm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleSICXECode\programblockssicxe.asm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleSICXECode\symboldefinesicxe.asm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

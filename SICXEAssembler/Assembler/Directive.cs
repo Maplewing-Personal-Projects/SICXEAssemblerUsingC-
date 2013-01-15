@@ -13,6 +13,7 @@ namespace SICXEAssembler
 
         public override void FirstPass(TwoPassAssembler tpa)
         {
+            BlockLocation = tpa.CurrentBlockName;
             Location = tpa.CurrentAddress;
             switch (_type.Mnemonic)
             {
@@ -25,8 +26,85 @@ namespace SICXEAssembler
                         tpa.CodeName = _label;
                     }
                     break;
-                case "END":
-                    tpa.Length = tpa.CurrentAddress - tpa.StartAddress;
+                case "END": 
+                    for (int i = 0; i < tpa.Code.Count; i++)
+                    {
+                        if (ReferenceEquals(tpa.Code[i], this))
+                        {
+                            int index = i;
+                            foreach (string s in tpa.LiteralTable)
+                            {
+                                List<string> temp = new List<string>();
+                                temp.Add(s.Substring(1));
+                                tpa.Code.Insert(index, Assembler.StatementTypeTable["BYTE"].Create(s, "BYTE", temp));
+                                tpa.Code[index].FirstPass(tpa);
+                                ++index;
+                            }
+                            tpa.LiteralTable.Clear();
+                        }
+                    }
+                    tpa.BlockTable[tpa.CurrentBlockName] = new Tuple<int, int>(tpa.BlockTable[tpa.CurrentBlockName].Item1, tpa.CurrentAddress);
+                    Location = tpa.CurrentAddress;
+                    break;
+                case "LTORG":
+                    for (int i = 0; i < tpa.Code.Count; i++ )
+                    {
+                        if (ReferenceEquals(tpa.Code[i], this))
+                        {
+                            int index = i+1;
+                            foreach (string s in tpa.LiteralTable)
+                            {
+                                List<string> temp = new List<string>();
+                                temp.Add(s.Substring(1));
+                                tpa.Code.Insert(index,Assembler.StatementTypeTable["BYTE"].Create(s, "BYTE", temp));
+                                tpa.Code[index].FirstPass(tpa);
+                                ++index;
+                            }
+                            tpa.LiteralTable.Clear();
+                        }
+                    }
+                    break;
+                case "EQU":
+                    if (_arguments[0] == "*")
+                    {
+                        BlockLocation = BlockLocation;
+                        Location = Location;
+                    }
+                    else if (_arguments[0].Contains("-"))
+                    {
+                        string arg1 = _arguments[0].Split('-')[0], arg2 = _arguments[0].Split('-')[1];
+                        Location = (tpa.BlockSymbolTable[arg1].Item2 - tpa.BlockSymbolTable[arg2].Item2);
+                        tpa.EquTable.Add(_label);
+                    }
+                    else
+                    {
+                        BlockLocation = tpa.BlockSymbolTable[_arguments[0]].Item1;
+                        Location = tpa.BlockSymbolTable[_arguments[0]].Item2;
+                    }
+                    break;
+                case "USE":
+                    tpa.BlockTable[tpa.CurrentBlockName] = new Tuple<int, int>(tpa.BlockTable[tpa.CurrentBlockName].Item1, tpa.CurrentAddress);
+                    if (_arguments.Count >= 1)
+                    {
+                        if (tpa.BlockTable.ContainsKey(_arguments[0]))
+                        {
+                            tpa.CurrentBlockName = _arguments[0];
+                            tpa.CurrentAddress = tpa.BlockTable[tpa.CurrentBlockName].Item2;
+                        }
+                        else
+                        {
+                            tpa.BlockTable[_arguments[0]] = new Tuple<int, int>(0, 0);
+                            tpa.CurrentBlockName = _arguments[0];
+                            tpa.CurrentAddress = tpa.BlockTable[tpa.CurrentBlockName].Item2;
+                        }
+                    }
+                    else
+                    {
+                        tpa.CurrentBlockName = "(default)";
+                        tpa.CurrentAddress = tpa.BlockTable[tpa.CurrentBlockName].Item2;
+                    }
+                    BlockLocation = tpa.CurrentBlockName;
+                    Location = tpa.CurrentAddress;
                     break;
                 default:
                     break;
@@ -34,12 +112,13 @@ namespace SICXEAssembler
             tpa.CurrentAddress += _length;
             if (_label != null && _label != "")
             {
-                tpa.SymbolTable[_label] = Location;
+                tpa.BlockSymbolTable[_label] = new Tuple<string,int>(BlockLocation, Location);
             }
         }
 
         public override void SecondPass(TwoPassAssembler tpa)
         {
+            base.SecondPass(tpa);
             _code.Add("");
             switch (_type.Mnemonic)
             {

@@ -13,6 +13,7 @@ namespace SICXEAssembler
         protected List<string> _code = new List<string>();
         protected string _relocation;
         public int Location { get; set; }
+        public string BlockLocation { get; set; }
         public int Length { get { return _length; } }
 
         public List<string> Code
@@ -43,12 +44,15 @@ namespace SICXEAssembler
             {
                 temp += string.Format("{0};", arg);
             }
-            temp += string.Format("\nLength:{0}, Location:{1}", _length, string.Format("{0:X}",Location).PadLeft(4,'0'));
+            temp += string.Format("\nLength:{0}, BlockLocation: {1}, Location:{2}\n", _length, BlockLocation, string.Format("{0:X}",Location).PadLeft(4,'0'));
             return temp;
         }
 
         public abstract void FirstPass(TwoPassAssembler tpa);
-        public abstract void SecondPass(TwoPassAssembler tpa);
+        public virtual void SecondPass(TwoPassAssembler tpa)
+        {
+            Location = tpa.BlockTable[BlockLocation].Item1 + Location;
+        }
         public abstract void OnePass(OnePassAssembler opa);
     }
 }

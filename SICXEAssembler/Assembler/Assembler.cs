@@ -16,6 +16,11 @@ namespace SICXEAssembler
         public string CodeName;
         protected TextReader _codeReader;
         protected List<Statement> _code = new List<Statement>();
+        public List<Statement> Code
+        {
+            get { return _code; }
+            set { _code = value; }
+        }
 
         protected int _length = 0;
         public int Length
@@ -65,7 +70,7 @@ namespace SICXEAssembler
             CreateRegisterTable();
 
             string labelPartRegExp = @"\w+";
-            string argumentPartRegExp = @"(?:(?:(?:\#|\@)?\w+)|(?:\=?(?i:C'.*')|(?i:X'.*')))";
+            string argumentPartRegExp = @"(?:(?:(?:\#|\@)?[\w\-]+)|(?:\=?(?i:(?i:C'.*')|(?i:X'.*')|\*))|\*)";
             string statementPartRegExp = "";
             foreach (KeyValuePair<string, StatementType> s in StatementTypeTable)
             {

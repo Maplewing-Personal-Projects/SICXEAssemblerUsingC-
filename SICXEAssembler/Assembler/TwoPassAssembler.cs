@@ -8,11 +8,21 @@ namespace SICXEAssembler
     public class TwoPassAssembler : Assembler
     {
         TextWriter _codeWriter;
+        public Dictionary<string, Tuple<string, int>> BlockSymbolTable { get; set; }
         public Dictionary<string, int> SymbolTable { get; set; }
+        public List<string> LiteralTable { get; set; }
+        public List<string> EquTable { get; set; }
+        public Dictionary<string, Tuple<int,int>> BlockTable { get; set; }
+        public string CurrentBlockName = "(default)";
 
         public TwoPassAssembler(TextReader tr) : base(tr)
         {
             SymbolTable = new Dictionary<string, int>();
+            LiteralTable = new List<string>();
+            EquTable = new List<string>();
+            BlockTable = new Dictionary<string, Tuple<int,int>>();
+            BlockTable[CurrentBlockName] = new Tuple<int,int>(0,0);
+            BlockSymbolTable = new Dictionary<string, Tuple<string, int>>();
         }
 
         public override void Assemble()
@@ -23,6 +33,39 @@ namespace SICXEAssembler
                 Console.WriteLine("SYMBOL: {0}, Location: {1}", symbol.Key, string.Format("{0:X}", symbol.Value).PadLeft(6, '0'));
             }
             _codeWriter = new StreamWriter(CodeName+".o");
+            
+            _length = 0;
+            string previousBlock = null;
+            Dictionary<string, Tuple<int, int>> tempBlockTable = new Dictionary<string,Tuple<int,int>>();
+            foreach(KeyValuePair<string,Tuple<int,int>> t in BlockTable)
+            {
+                Console.WriteLine(t.Key + ":" + string.Format("{0:X}", t.Value.Item2).PadLeft(4,'0'));
+                if (previousBlock != null)
+                {
+                    tempBlockTable[t.Key] = new Tuple<int, int>(_length, t.Value.Item2);
+                }
+                else
+                {
+                    tempBlockTable[t.Key] = t.Value;
+                }
+                _length += t.Value.Item2;
+                previousBlock = t.Key;
+            }
+            BlockTable = tempBlockTable;
+            foreach (KeyValuePair<string, Tuple<string, int>> t in BlockSymbolTable)
+            {
+                if (EquTable.Contains(t.Key))
+                {
+                    SymbolTable[t.Key] = t.Value.Item2;
+                }
+                else
+                {
+                    SymbolTable[t.Key] = BlockTable[t.Value.Item1].Item1 + t.Value.Item2;
+                }
+
+                Console.WriteLine(t.Key + "=" + string.Format("{0:X}", SymbolTable[t.Key]).PadLeft(6, '0'));
+            }
+
             SecondPass();
             _codeWriter.Close();
         }
@@ -79,7 +122,7 @@ namespace SICXEAssembler
                     {
                         if (_previousOutputAddress != NoAddress)
                         {
-                            mc.TRecord[mc.TRecord.Count-1] += string.Format("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0:X}", _code[i - 1].Location - _previousOutputAddress + _code[i - 1].Length).PadLeft(2, '0');
                             for (int j = previousIndex; j < i; j++)
                             {
                                 mc.TRecord[mc.TRecord.Count - 1] += _code[j].Code[0];
@@ -105,9 +148,10 @@ namespace SICXEAssembler
                             mc.TRecord[mc.TRecord.Count-1] += string.Format("T{0}", string.Format("{0:X}", _previousOutputAddress).PadLeft(6, '0'));
                             previousIndex = i;
                         }
-                        else if (_code[i].Location - _previousOutputAddress + _code[i].Length >= 0x20)
+                        else if ((_code[i-1].Location - _previousOutputAddress + _code[i-1].Length) + _code[i].Length >= 0x20 ||
+                            _code[previousIndex].BlockLocation != _code[i].BlockLocation)
                         {
-                            mc.TRecord[mc.TRecord.Count-1] += string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0');
+                            mc.TRecord[mc.TRecord.Count-1] += string.Format("{0:X}", _code[i-1].Location - _previousOutputAddress + _code[i-1].Length).PadLeft(2, '0');
                             for (int j = previousIndex; j < i; j++)
                             {
                                 mc.TRecord[mc.TRecord.Count-1] += _code[j].Code[0];
@@ -121,11 +165,11 @@ namespace SICXEAssembler
                 }
                 else
                 {
-                    if (_code[i+1].Location - _code[i].Location > 0)
+                    if (_code[i].Length > 0 || _code[previousIndex].BlockLocation != _code[i].BlockLocation)
                     {
                         if (_previousOutputAddress != NoAddress)
                         {
-                            mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
+                            mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", string.Format("{0:X}", _code[i - 1].Location - _previousOutputAddress + _code[i - 1].Length).PadLeft(2, '0'));
                             for (int j = previousIndex; j < i; j++)
                             {
                                 mc.TRecord[mc.TRecord.Count - 1] +=  _code[j].Code[0];
