@@ -10,12 +10,12 @@ namespace SICXEAssembler
         protected StatementType _type;
         protected List<string> _arguments;
         protected int _length;
-        protected string _code;
+        protected List<string> _code = new List<string>();
         protected string _relocation;
         public int Location { get; set; }
         public int Length { get { return _length; } }
 
-        public string Code
+        public List<string> Code
         {
             get { return _code; }
             set { _code = value; }
@@ -49,6 +49,7 @@ namespace SICXEAssembler
 
         public abstract void FirstPass(TwoPassAssembler tpa);
         public abstract void SecondPass(TwoPassAssembler tpa);
+        public abstract void OnePass(OnePassAssembler opa);
     }
 }
 

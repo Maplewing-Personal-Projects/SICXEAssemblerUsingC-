@@ -7,14 +7,11 @@ namespace SICXEAssembler
 {
     public class TwoPassAssembler : Assembler
     {
-        TextReader _codeReader;
         TextWriter _codeWriter;
-        List<Statement> _code = new List<Statement>();
         public Dictionary<string, int> SymbolTable { get; set; }
 
-        public TwoPassAssembler(TextReader tr)
+        public TwoPassAssembler(TextReader tr) : base(tr)
         {
-            _codeReader = tr;
             SymbolTable = new Dictionary<string, int>();
         }
 
@@ -71,37 +68,36 @@ namespace SICXEAssembler
             for(int i = 0 ; i < _code.Count ; i++)
             {
                 _code[i].SecondPass(this);
-                Console.WriteLine(i.ToString() + ":" + _code[i].Code);
 
                 if (_code[i].Relocation != null && _code[i].Relocation != "")
                 {
                     mc.MRecord.Add(_code[i].Relocation);
                 }
-                if (_code[i].Code != null && _code[i].Code != "")
+                if (_code[i].Code != null && _code[i].Code[0] != "")
                 {
-                    if (_code[i].Code[0] == 'H' || _code[i].Code[0] == 'E')
+                    if (_code[i].Code[0][0] == 'H' || _code[i].Code[0][0] == 'E')
                     {
                         if (_previousOutputAddress != NoAddress)
                         {
                             mc.TRecord[mc.TRecord.Count-1] += string.Format("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
                             for (int j = previousIndex; j < i; j++)
                             {
-                                mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", _code[j].Code);
+                                mc.TRecord[mc.TRecord.Count - 1] += _code[j].Code[0];
                             }
                             _previousOutputAddress = NoAddress;
                         }
-                        if (_code[i].Code[0] == 'H')
+                        if (_code[i].Code[0][0] == 'H')
                         {
-                            mc.HRecord = _code[i].Code;
+                            mc.HRecord = _code[i].Code[0];
                         }
                         else
                         {
-                            mc.ERecord = _code[i].Code;
+                            mc.ERecord = _code[i].Code[0];
                         }
                     }
                     else
                     {
-                        _code[i].Code = _code[i].Code.Substring(1);
+                        _code[i].Code[0] = _code[i].Code[0].Substring(1);
                         if (_previousOutputAddress == NoAddress)
                         {
                             mc.TRecord.Add("");
@@ -114,7 +110,7 @@ namespace SICXEAssembler
                             mc.TRecord[mc.TRecord.Count-1] += string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0');
                             for (int j = previousIndex; j < i; j++)
                             {
-                                mc.TRecord[mc.TRecord.Count-1] += _code[j].Code;
+                                mc.TRecord[mc.TRecord.Count-1] += _code[j].Code[0];
                             }
                             mc.TRecord.Add("");
                             _previousOutputAddress = _code[i].Location;
@@ -132,7 +128,7 @@ namespace SICXEAssembler
                             mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", string.Format("{0:X}", _code[i].Location - _previousOutputAddress).PadLeft(2, '0'));
                             for (int j = previousIndex; j < i; j++)
                             {
-                                mc.TRecord[mc.TRecord.Count - 1] += string.Format("{0}", _code[j].Code);
+                                mc.TRecord[mc.TRecord.Count - 1] +=  _code[j].Code[0];
                             }
                             _previousOutputAddress = NoAddress;
                         }

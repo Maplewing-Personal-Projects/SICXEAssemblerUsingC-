@@ -8,10 +8,13 @@ namespace SICXEAssembler
         public static void Main(string[] args)
         {
             string filename = "";
+            string mode = "";
             if (args.Length < 1)
             {
                 Console.Write("FileName: ");
                 filename = Console.ReadLine();
+                Console.Write("Mode: ");
+                mode = Console.ReadLine();
             }
             else
             {
@@ -21,8 +24,16 @@ namespace SICXEAssembler
             {
                 try
                 {
-                    TwoPassAssembler assembler = new TwoPassAssembler(code);
-                    assembler.Assemble();
+                    if (mode == "--onepass")
+                    {
+                        OnePassAssembler assembler = new OnePassAssembler(code);
+                        assembler.Assemble();
+                    }
+                    else
+                    {
+                        TwoPassAssembler assembler = new TwoPassAssembler(code);
+                        assembler.Assemble();
+                    }
                     
                 }
                 catch (Error e)

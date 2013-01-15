@@ -40,15 +40,16 @@ namespace SICXEAssembler
 
         public override void SecondPass(TwoPassAssembler tpa)
         {
+            _code.Add("");
             switch (_type.Mnemonic)
             {
                 case "START":
-                    _code = "H" + tpa.CodeName.PadRight(6) + 
+                    _code[_code.Count - 1] += ("H" + tpa.CodeName.PadRight(6) + 
                         string.Format("{0:X}",tpa.StartAddress).PadLeft(6,'0') +
-                        string.Format("{0:X}", tpa.Length).PadLeft(6, '0');
+                        string.Format("{0:X}", tpa.Length).PadLeft(6, '0'));
                     break;
                 case "END":
-                    _code = "E" + string.Format("{0:X}",tpa.SymbolTable[_arguments[0]]).PadLeft(6,'0');
+                    _code[_code.Count - 1] += ("E" + string.Format("{0:X}", tpa.SymbolTable[_arguments[0]]).PadLeft(6, '0'));
                     break;
                 case "BASE":
                     tpa.BaseAddress = tpa.SymbolTable[_arguments[0]];
@@ -57,23 +58,49 @@ namespace SICXEAssembler
                     tpa.BaseAddress = Assembler.NoAddress;
                     break;
                 case "BYTE":
-                    _code = "T";
+                    _code[_code.Count - 1] += "T";
                     if (_arguments[0][0] == 'X')
                     {
-                        _code += _arguments[0].Substring(1).Trim('\'');
+                        _code[_code.Count - 1] += _arguments[0].Substring(1).Trim('\'');
                     }
                     else if (_arguments[0][0] == 'C')
                     {
                         string arg = _arguments[0].Substring(1).Trim('\'');
                         foreach (char c in arg)
                         {
-                            _code += string.Format("{0:X}", (int)c).PadLeft(2, '0');
+                            _code[_code.Count - 1] += string.Format("{0:X}", (int)c).PadLeft(2, '0');
                         }
                     }
                     break;
                 case "WORD":
-                    _code = string.Format("{0:X}", Convert.ToInt32(_arguments[0])).PadLeft(6, '0');
+                    _code[_code.Count - 1] += string.Format("{0:X}", Convert.ToInt32(_arguments[0])).PadLeft(6, '0');
                     break;
+            }
+        }
+
+        public override void OnePass(OnePassAssembler opa)
+        {
+            Location = opa.CurrentAddress;
+            switch (_type.Mnemonic)
+            {
+                case "START":
+                    opa.StartAddress = Convert.ToInt32(_arguments[0], 16);
+                    opa.CurrentAddress = opa.StartAddress;
+                    Location = opa.CurrentAddress;
+                    if (_label != null && _label != "")
+                    {
+                        opa.CodeName = _label;
+                    }
+                    break;
+                case "END":
+                    opa.Length = opa.CurrentAddress - opa.StartAddress;
+                    break;
+                default:
+                    break;
+            }
+            opa.CurrentAddress += _length;
+            if (_label != null && _label != "")
+            {
             }
         }
     }

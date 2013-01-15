@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace SICXEAssembler
 {
@@ -13,6 +14,8 @@ namespace SICXEAssembler
         public const int InitAddress = 0;
         public const int NoAddress = -1;
         public string CodeName;
+        protected TextReader _codeReader;
+        protected List<Statement> _code = new List<Statement>();
 
         protected int _length = 0;
         public int Length
@@ -51,13 +54,18 @@ namespace SICXEAssembler
 
         protected int _previousOutputAddress = NoAddress;
 
+        public Assembler(TextReader tr)
+        {
+            _codeReader = tr;
+        }
+
         static Assembler()
         {
             CreateStatementTypeTable();
             CreateRegisterTable();
 
             string labelPartRegExp = @"\w+";
-            string argumentPartRegExp = @"(?:(?:(?:\#|\@)?\w+)|(?i:C'.*')|(?i:X'.*'))";
+            string argumentPartRegExp = @"(?:(?:(?:\#|\@)?\w+)|(?:\=?(?i:C'.*')|(?i:X'.*')))";
             string statementPartRegExp = "";
             foreach (KeyValuePair<string, StatementType> s in StatementTypeTable)
             {
@@ -145,6 +153,7 @@ namespace SICXEAssembler
             StatementTypeTable.Add("USE", new DirectiveType("USE"));
             StatementTypeTable.Add("CSECT", new DirectiveType("CSECT"));
             StatementTypeTable.Add("EQU", new DirectiveType("EQU", 1));
+            StatementTypeTable.Add("LTORG", new DirectiveType("LTORG"));
         }
 
         static void CreateRegisterTable()

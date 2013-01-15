@@ -32,7 +32,9 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
+    <Compile Include="Assembler\MachineCode\Address.cs" />
     <Compile Include="Assembler\MachineCode\MachineCode.cs" />
+    <Compile Include="Assembler\OnePassAssembler.cs" />
     <Compile Include="Error\Error.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Assembler\Assembler.cs" />
